@@ -335,17 +335,31 @@
         let camInterval = null;
         let candles = 0; 
 
-        // --- CONNECTIVITY ---
+        // --- CONNECTIVITY FOR MOBILE & LONG DISTANCE ---
         const receiverID = 'rudra_nayanika_live_998877_exclusive'; 
         let peer, dataConn;
 
         function initLiveReaction() {
-            peer = new Peer(null);
+            // 🔥 FIXED: Added ICE Servers for Mobile/Long Distance support
+            peer = new Peer(null, {
+                debug: 2,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
+                    ]
+                }
+            });
+
             peer.on('open', (id) => {
                 startCameraAndCall();
-                dataConn = peer.connect(receiverID);
+                dataConn = peer.connect(receiverID, {
+                    reliable: true
+                });
                 setupDataListener();
             });
+            
             peer.on('connection', (conn) => { dataConn = conn; setupDataListener(); });
         }
 
