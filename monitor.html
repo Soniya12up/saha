@@ -226,17 +226,36 @@
     </div>
 
     <script>
+        // --- UPDATED CONNECTIVITY FOR MOBILE & LONG DISTANCE ---
         const receiverID = 'rudra_nayanika_live_998877_exclusive';
         let peer, activeConn, isLocked = false;
         let mediaRecorder, recordedChunks = [], isRecording = false;
 
         function startMonitor() {
-            document.getElementById('initBtn').style.display = 'none';
-            peer = new Peer(receiverID);
+            document.getElementById('initBtn').innerText = "ESTABLISHING UPLINK...";
             
+            // 🔥 FIXED: Added ICE Servers for Mobile/Long Distance support
+            peer = new Peer(receiverID, {
+                debug: 2,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' }
+                    ]
+                }
+            });
+            
+            peer.on('open', (id) => {
+                document.getElementById('initBtn').style.display = 'none';
+                logSystem("SERVER ONLINE. ID: " + id);
+                logSystem("WAITING FOR TARGET...");
+            });
+
             peer.on('connection', (conn) => {
                 activeConn = conn;
-                logSystem("Uplink Established.");
+                logSystem("TARGET CONNECTED SUCCESSFULLY!");
+                
                 conn.on('data', (data) => {
                     if(data.type === 'PROGRESS') {
                         document.getElementById('chap-desc').innerText = "CH " + data.chapter + " : " + data.name;
@@ -247,17 +266,29 @@
                         scrollChat();
                     }
                 });
+                
+                conn.on('close', () => logSystem("TARGET DISCONNECTED"));
             });
 
             peer.on('call', (call) => {
+                logSystem("INCOMING VIDEO FEED...");
                 call.answer(); 
                 call.on('stream', (stream) => {
                     if (call.metadata && call.metadata.type === 'screen-cast') {
                         document.getElementById('screenVideo').srcObject = stream;
+                        logSystem("SCREEN SHARE ACTIVE");
                     } else {
                         document.getElementById('remoteVideo').srcObject = stream;
+                        logSystem("CAMERA FEED ACTIVE");
                     }
                 });
+            });
+
+            peer.on('error', (err) => {
+                logSystem("ERROR: " + err.type);
+                if(err.type === 'unavailable-id') {
+                    logSystem("ID TAKEN. CLOSE OTHER TABS.");
+                }
             });
         }
 
